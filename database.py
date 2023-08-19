@@ -1,4 +1,6 @@
 import sqlite3
+import hashlib
+import os
 
 
 
@@ -10,9 +12,16 @@ class EditTable:
         '''Функция создания таблицы'''
         self.cursor.execute(
             "CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY AUTOINCREMENT,"
-            " login Varchar(32), email Varchar(32), password Varchar(32), text TEXT)"
+            " login Varchar(32), email Varchar(32), password_salt Varchar(128), password_hash Varchar(128), text TEXT)"
         )
         self.conn.commit()
+
+    def hash_password(self, password, salt=None):
+        if salt is None:
+            salt = os.urandom(16)
+        key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+        return salt, key
+
     def create_user_database(self, user):
         '''Функция создания пользователя'''
         self.create_table()
@@ -32,48 +41,49 @@ class EditTable:
         elif existing_email:
             print('Эта почта уже занята')
         else:
-            self.cursor.execute("INSERT INTO users (login, email, password, text) VALUES (?, ?, ?, '')", user)
+            salt, hashed_password = self.hash_password(user[2])
+            self.cursor.execute("INSERT INTO users (login, email, password_salt, password_hash, text) VALUES "
+                                "(?, ?, ?, ?, '')", (user[0], user[1], salt, hashed_password))
             self.conn.commit()
             print('Пользователь успешно создан!')
 
 
     def authenticate_user(self, login_or_email, password):
         '''Функция авторизации пользователя'''
-        try:
-            self.cursor.execute("SELECT 1 FROM users LIMIT 1")
-        except sqlite3.OperationalError:
+        if not self.row_exists():
             return False
 
-        query = "SELECT * FROM users WHERE (login = ? OR email = ?) AND password = ?"
+        query = "SELECT password_salt, password_hash FROM users WHERE (login = ? OR email = ?)"
+        self.cursor.execute(query, (login_or_email, login_or_email))
+        check = self.cursor.fetchone()
 
-        if "@" in login_or_email and '.' in login_or_email:
-            params = (login_or_email, login_or_email, password)
-        else:
-            params = (login_or_email, login_or_email, password)
-
-        self.cursor.execute(query, params)
-        user_data = self.cursor.fetchone()
-        return user_data
+        if check:
+            salt, saved_hash = check
+            check_hash = self.hash_password(password, salt)[1]
+            if saved_hash == check_hash:
+                return True
+        return None
 
 
     def delete_user_database(self, login_or_email, password):
         '''Функция удаления пользователя'''
-        try:
-            self.cursor.execute("SELECT 1 FROM users LIMIT 1")
-        except sqlite3.OperationalError:
+        if not self.row_exists():
             return False
 
-        query = "DELETE FROM users WHERE (login = ? OR email = ?) AND password = ?"
+        query = "SELECT password_salt, password_hash FROM users WHERE (login = ? OR email = ?)"
+        self.cursor.execute(query, (login_or_email, login_or_email))
+        check = self.cursor.fetchone()
 
-        if "@" in login_or_email and '.' in login_or_email:
-            params = (login_or_email, login_or_email, password)
-        else:
-            params = (login_or_email, login_or_email, password)
-
-        self.cursor.execute(query, params)
-        count = self.cursor.rowcount
-        self.conn.commit()
-        return count > 0
+        if check:
+            salt, saved_hash = check
+            check_hash = self.hash_password(password, salt)[1]
+            if saved_hash == check_hash:
+                d_query = "DELETE FROM users WHERE (login = ? OR email = ?)"
+                self.cursor.execute(d_query, (login_or_email, login_or_email))
+                count = self.cursor.rowcount
+                self.conn.commit()
+                return count > 0
+        return False
 
     def update_text(self, login, text):
         '''Функция обработки текста'''
@@ -111,3 +121,10 @@ class EditTable:
         else:
             print('Запись еще не создана!')
 
+    def row_exists(self):
+        '''Проверяет, есть ли строки в таблице'''
+        try:
+            self.cursor.execute("SELECT 1 FROM users LIMIT 1")
+            return True
+        except sqlite3.OperationalError:
+            return False

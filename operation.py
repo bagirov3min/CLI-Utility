@@ -1,7 +1,11 @@
+import re
+import generate_password
 from database import EditTable
 
 class UserOperation:
-    table = EditTable()
+    def __init__(self):
+        self.table = EditTable()
+
     def main(self):
         ''' Функция запуска рограммы и распределение запросов '''
         ask = input(
@@ -29,8 +33,7 @@ class UserOperation:
                 ' Чтобы выйти из аккаунта наберите "4".\n'
             )
             if ask == "1":
-                print('Введите текст, который хотите добавить в запись')
-                text = input()
+                text = input("Введите текст, который хотите добавить в запись': \n")
                 self.table.update_text(login, text)
             elif ask == "2":
                 self.table.delete_text(login)
@@ -43,33 +46,28 @@ class UserOperation:
 
     def create_user(self):
         '''Функция запроса к базе для создания пользователя'''
-        login = input("Введите логин: ")
-        while len(login) == 0:
-            print("Поле логин не может быть пустым!")
-            login = input("Введите логин: ")
-        email = input("Введите email: ")
-        while "@" not in email or "." not in email:
-            print("Введенн некорректный email!")
-            email = input("Введите email: ")
-        password = input("Введите пароль: ")
-        while len(password) < 8:
-            print("Длина пароля не может составлять менее 8 символов!")
-            password = input("Введите пароль: ")
-        user = (login, email, password)
+        promts = [
+            ("Введите логин: ", lambda x: len(x) > 0),
+            ("Введите email: ", lambda x: re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", x)),
+            ("Введите пароль (или нажмите Enter для автогенерации): ", lambda x: x == "" or len(x) >= 8 and
+            any(c.isupper() for c in x) and any(c.islower() for c in x) and any(c.isdigit() for c in x))
+        ]
+        user = self.checking_values(promts)
+        if user[2] == "":
+            user[2] = generate_password.pass_choice()
+            print(f'Сгенерированный пароль: {user[2]}\n'
+                  f'Запишите его в надежное место или запомните')
+        user = tuple(user)
         self.table.create_user_database(user)
         return self.main()
 
     def initilization(self):
         '''Функция запроса к базе для входа пользователя'''
-        login_or_email = input("Введите логин или email: ")
-        while len(login_or_email) == 0:
-            print("Поле не может быть пустым!")
-            login_or_email = input("Введите логин: ")
-        password = input("Введите пароль: ")
-        while len(password) < 8:
-            print("Длина пароля не может составлять менее 8 символов!")
-            password = input("Введите пароль: ")
-        return login_or_email, password
+        promts = [
+            ("Введите логин или email: ", lambda x: len(x) > 0),
+            ("Введите пароль: ", lambda x: len(x) >= 8)]
+        user = tuple(self.checking_values(promts))
+        return user[0], user[1]
 
 
 
@@ -116,3 +114,16 @@ class UserOperation:
             return self.main()
         else:
             return self.main_authorize(login)
+
+    def checking_values(self, prompts):
+        user = []
+        for prompt, validation in prompts:
+            while True:
+                value = input(prompt)
+                if validation(value):
+                    user.append(value)
+                    break
+                else:
+                    print("Некорректное значение")
+        return user
+
