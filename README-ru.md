@@ -26,7 +26,7 @@
 ## Установка
 
 1. Клонируйте репозиторий: `git clone 
-   https://github.com/Dahaka1/tolearn/tree/student`
+   https://github.com/bagirov3min/mini_project/`
 2. Перейдите в корневую директорию вашего проекта
 3. Запустите программу, выполнив файл main.py
 
