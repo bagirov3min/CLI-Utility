@@ -1,6 +1,8 @@
 # CLI Utility
 
-Brief description of your project.
+Welcome to My CLI Utility Project!
+
+[English](readme.md) | [Русский](readme-ru.md)
 
 ## Description
 
@@ -26,7 +28,7 @@ the secure storage of passwords.
 ## Installation
 
 1. Clone the repository: `git clone 
-   https://github.com/Dahaka1/tolearn/tree/student`
+   https://github.com/bagirov3min/mini_project/`
 2. Navigate to the root directory of your project
 3. Run the program by executing the main.py file
 
