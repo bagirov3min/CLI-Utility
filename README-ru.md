@@ -27,7 +27,7 @@
 ## Установка
 
 1. Клонируйте репозиторий: `git clone 
-   https://github.com/bagirov3min/mini_project/`
+   https://github.com/bagirov3min/CLI-Utility`
 2. Перейдите в корневую директорию вашего проекта
 3. Запустите программу, выполнив файл main.py
 
