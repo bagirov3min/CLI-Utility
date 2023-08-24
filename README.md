@@ -28,7 +28,7 @@ the secure storage of passwords.
 ## Installation
 
 1. Clone the repository: `git clone 
-   https://github.com/bagirov3min/mini_project/`
+   https://github.com/bagirov3min/CLI-Utility`
 2. Navigate to the root directory of your project
 3. Run the program by executing the main.py file
 
