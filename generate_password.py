@@ -1,14 +1,39 @@
 import random
 
-# Создаем списки символов
-letters = "ABCDEFGHIJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz!#$%&*+-=?@^_.23456789"
 
-#
-def pass_choice():
-    '''Функция генерации пароля'''
-    pass_len = random.randint(8, 16)
-    password = []
-    for _ in range(pass_len):
-        password += random.choice(letters)
+def choice_settings():
+    '''Функция выбора настроек генерируемого пароля'''
+    # Создаем строки
+    settings = {
+        'digits': ("0123456789", "цифры"),
+        'lowercase_letters': ("abcdefghijklmnopqrstuvwxyz", "буквы нижнего регистра"),
+        'uppercase_letters': ("ABCDEFGHIJKLMNOPQRSTUVWXYZ", "буквы верхнего регистра"),
+        'punctuation': ("!#$%&*+-=?@^_.", "символы"),
+        'ambiguous': ('il1Lo0O', "неочевидные символы 'il1Lo0O'")
+    }
+
+    chars = []
+    # Добавляем строки в список в соответствии с выбранными параметрами
+    for key, (value, description) in settings.items():
+        answer = input(f"Напишите да, если хотите использовать {description}: ")
+
+        if answer.lower() == 'да':
+            chars.extend(value)
+        elif key == 'ambiguous' and answer.lower() != 'да':
+            for char in value:
+                if char in chars:
+                    chars.remove(char)
+
+    # Проверяем содержит ли список строки после параметризации
+    if len(chars) == 0:
+        print("Вы не выбрали ни один из предложенных вариантов символов")
+        return choice_settings()
+
+    return pass_choice(chars)
+
+
+def pass_choice(chars: list):
+    '''Генерируем пароль случайной длины из случайных символов списка и возвращаем его'''
+    password = [random.choice(chars) for _ in range(random.randint(8, 17))]
     return ''.join(password)
 

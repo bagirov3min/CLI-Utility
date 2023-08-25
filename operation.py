@@ -1,149 +1,190 @@
 import re
 import generate_password
-from database import EditTable
+from database import TextDatabase, UserDatabase
 
 
-class UserOperation:
-    '''Создаем операционный модуль'''
-    def __init__(self):
-        '''Указываем параметры для модуля'''
-        self.table = EditTable()
+def menu():
+    """Функция запуска программы и распределение запросов"""
+    user_operation = UserOperation()
+
+    query = input(
+        ' Чтобы создать пользователя наберите "1".\n'
+        ' Чтобы авторизоваться наберите "2".\n'
+        ' Чтобы удалить учетную запись наберите "3".\n'
+        ' Чтобы выйти из программы наберите "4".\n'
+    )
+    match query:
+        case "1":
+            check = user_operation.create()
+            if check is not None:
+                return check
+        case "2":
+            check = user_operation.authenticate()
+            if check is not None:
+                return check
+        case "3":
+            check = user_operation.delete()
+            if check is not None:
+                return check
+        case _:
+            return exit_program()
 
 
-    def main(self):
-        ''' Функция запуска программы и распределение запросов '''
+def menu_authorize(login: str):
+    """ Функция распределение авторизированных запросов """
+    text_operation = TextOperation()
+
+    while True:
         query = input(
-            ' Чтобы создать пользователя наберите "1".\n'
-            ' Чтобы авторизоваться наберите "2".\n'
-            ' Чтобы удалить учетную запись наберите "3".\n'
-            ' Чтобы выйти из программы наберите "4".\n'
+            ' Чтобы добавить запись наберите "1".\n'
+            ' Чтобы удалить запись наберите "2".\n'
+            ' Чтобы просмотреть запись наберите "3"\n'
+            ' Чтобы выйти из аккаунта наберите "4".\n'
         )
         match query:
             case "1":
-                return self.create_user()
+                text_operation.update(login)
             case "2":
-                return self.authorization()
+                text_operation.delete(login)
             case "3":
-                return self.delete_user()
+                text_operation.show(login)
             case _:
-                return self.exit_programm()
+                return exit_user(login)
 
 
-    def main_authorize(self, login: str):
-        ''' Функция распределение авторизированных запросов '''
+def initialization():
+    """Функция создания кортежа на основе введенных строк"""
+    prompts = [
+        ("Введите логин или email: ", lambda x: len(x) > 0),
+        ("Введите пароль: ", lambda x: len(x) >= 8)]
+    user = tuple(checking_values(prompts))
+    return user
+
+
+def checking_values(prompts: list):
+    """Функция проверки корректности введенных строк"""
+    user = []
+    for prompt, validation in prompts:
         while True:
-            query = input(
-                ' Чтобы добавить запись наберите "1".\n'
-                ' Чтобы удалить запись наберите "2".\n'
-                ' Чтобы просмотреть запись наберите "3"\n'
-                ' Чтобы выйти из аккаунта наберите "4".\n'
-            )
-            match query:
-                case "1":
-                    text = input("Введите текст, который хотите добавить в запись': \n")
-                    return self.table.update_text(login, text)
-                case "2":
-                    return self.table.delete_text(login)
-                case "3":
-                    return self.table.show_text(login)
-                case _:
-                    return self.exit_user(login)
+            value = input(prompt)
+            if validation(value):
+                user.append(value)
+                break
+            else:
+                print("Некорректное значение")
+    return user
 
 
-    def create_user(self):
-        '''Функция запроса к базе для создания пользователя'''
+def exit_program():
+    """Функция выхода из программы"""
+    ask = input(
+        'Если вы хотите выйти из программы введите "1". '
+        'Если хотите продолжить выполнение программы введите "2"'
+    )
+    if ask == "1":
+        return False
+    else:
+        return menu()
+
+
+def exit_user(login: str):
+    """Функция выхода из аккаунта"""
+    ask = input(
+        'Если вы хотите выйти из аккаунта введите "1". '
+        'Если хотите продолжить работу введите "2"'
+    )
+    if ask == "1":
+        return menu()
+    else:
+        return menu_authorize(login)
+
+
+class UserOperation:
+    """Создаем операционный модуль для работы с юзером"""
+
+    def __init__(self):
+        self.user_db = UserDatabase()
+
+    def create(self):
+        """Функция запроса к базе для создания пользователя"""
         # С помощью анонимных функций создаем список кортежей, в котором указаны условия
         # к вводимым пользователем строкам
-        promts = [
+        prompts = [
             ("Введите логин: ", lambda x: len(x) > 0),
-            ("Введите email: ", lambda x: re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", x)),
-            ("Введите пароль (или нажмите Enter для автогенерации): ", lambda x: x == "" or len(x) >= 8 and
-            len(x) <= 16 and any(c.isupper() for c in x) and any(c.islower() for c in x) and
-            any(c.isdigit() for c in x))
+            ("Введите email: ", lambda x: re.match(
+                    r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", x)),
+            ("Введите пароль (или нажмите Enter для автогенерации): ",
+                lambda x: x == "" or 8 <= len(x) <= 16 and any(c.isupper() for c in x) and
+                any(c.islower() for c in x) and any(c.isdigit() for c in x))
         ]
-        user = self.checking_values(promts)
+        user = checking_values(prompts)
 
         # Если пользователь не указывает пароль, то запускается модуль автогенерации пароля
         if user[2] == "":
-            user[2] = generate_password.pass_choice()
+            user[2] = generate_password.choice_settings()
             print(f'Сгенерированный пароль: {user[2]}\n'
                   f'Запишите его в надежное место или запомните')
         user = tuple(user)
-        self.table.create_user_database(user)
-        self.main()
+        check = self.user_db.create_user(user)
+        if check:
+            print('Пользователь успешно создан!')
+            return menu_authorize(user[0])
+        else:
+            print('С этим логином и почтой уже существует учетная запись')
+            return False
 
-
-    def initialization(self):
-        '''Функция проверки корректности вводимых строк'''
-        promts = [
-            ("Введите логин или email: ", lambda x: len(x) > 0),
-            ("Введите пароль: ", lambda x: len(x) >= 8)]
-        user = tuple(self.checking_values(promts))
-        return user
-
-
-    def authorization(self):
-        '''Функция запроса к базе для авторизации пользователя'''
+    def authenticate(self):
+        """Функция запроса к базе для авторизации пользователя"""
         # Передаем введенные строки пользователя в функцию корректности
         # далее передаем эти данные в базу и ждем ответа.
-        user = self.initialization()
-        check = self.table.authenticate_user(user)
+        user = initialization()
+        check = self.user_db.authenticate_user(user)
         if check:
             print("Вход успешно выполнен! Хорошего дня")
-            return self.main_authorize(user[0])
+            return menu_authorize(user[0])
         else:
             print("Неправильный логин или пароль")
-            return self.main()
+            return menu()
 
-
-    def delete_user(self):
-        '''Функция запроса к базе для удаления пользователя'''
+    def delete(self):
+        """Функция запроса к базе для удаления пользователя"""
         # Передаем введенные строки пользователя в функцию корректности
         # далее передаем эти данные в базу и ждем ответа.
-        user = self.initialization()
-        check = self.table.delete_user_database(user)
+        user = initialization()
+        check = self.user_db.delete_user(user)
         if check:
             print("Пользователь успешно удален")
         else:
             print("Пользователя с введенными данными не существует")
-        return self.main()
+        return menu()
 
 
-    def exit_programm(self):
-        '''Функция выхода из программы'''
-        ask = input(
-            'Если вы хотите выйти из программы введите "1". '
-            'Если хотите продолжить выполнение программы введите "2"'
-        )
-        if ask == "1":
-            return False
+class TextOperation:
+    """Создаем операционный модуль для работы с текстом"""
+
+    def __init__(self):
+        self.text_db = TextDatabase()
+
+    def update(self, login: str):
+        """Создаем функцию добавления текста в таблицу"""
+        text = input("Введите текст, который хотите добавить в запись': \n")
+
+        check = self.text_db.update_text(login, text)
+        if check:
+            print('Текст успешно обновлен!')
+
+    def show(self, login: str):
+        """Создаем функцию вывода на просмотр сохраненного текста"""
+        check = self.text_db.show_text(login)
+        if check != '':
+            print(check)
         else:
-            return self.main()
+            print('Запись еще не создана!')
 
-
-    def exit_user(self, login: str):
-        '''Функция выхода из аккаунта'''
-        ask = input(
-            'Если вы хотите выйти из аккаунта введите "1". '
-            'Если хотите продолжить работу введите "2"'
-        )
-        if ask == "1":
-            return self.main()
+    def delete(self, login: str):
+        """Создаем функцию удаления текста из таблицы"""
+        check = self.text_db.delete_text(login)
+        if check != '':
+            print('Запись удалена!')
         else:
-            return self.main_authorize(login)
-
-
-    def checking_values(self, prompts: list):
-        '''Функция проверки корректности введенных строк на основе
-        параметров указанных в анонимных функциях'''
-        user = []
-        for prompt, validation in prompts:
-            while True:
-                value = input(prompt)
-                if validation(value):
-                    user.append(value)
-                    break
-                else:
-                    print("Некорректное значение")
-        return user
-
+            print('Запись еще не создана!')
