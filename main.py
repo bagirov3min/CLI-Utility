@@ -1,4 +1,6 @@
+def main():
+    from operation import menu
+    menu()
+
 if __name__ == "__main__":
-    from operation import UserOperation
-    operation = UserOperation()
-    operation.main()
+    main()
