@@ -3,6 +3,6 @@ venv/
 
 # Игнорирование базы данных
 users.sqlite
-
+tests/users.sqlite
 # Игнорировать директорию .idea и все файлы в ней
 .idea/
