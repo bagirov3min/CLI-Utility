@@ -38,7 +38,7 @@ class TestUserCreated(unittest.TestCase):
     ])
     def test_create_user(self, mock_input: unittest.mock.MagicMock) -> None:
         """Тестируем создание пользователя"""
-        expected_list = ['Пользователь успешно создан!', 'С этим логином и почтой уже существует учетная запись']
+        expected_list = ['Пользователь успешно создан!', 'С этим логином или почтой уже существует учетная запись']
 
         with patch('sys.stdout', new_callable=io.StringIO) as mock_output:
             menu()

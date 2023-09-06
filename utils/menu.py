@@ -23,14 +23,16 @@ def menu() -> None:
 
         case "2":
             user = authentication()
-            print("Вход успешно выполнен! Хорошего дня")
-            return menu_authorize(user[0])
+            if user:
+                print("Вход успешно выполнен! Хорошего дня")
+                return menu_authorize(user[0])
 
         case "3":
             user = authentication()
-            user_db.delete_user(user)
-            print("Пользователь успешно удален")
-            return menu()
+            if user:
+                user_db.delete_user(user)
+                print("Пользователь успешно удален")
+                return menu()
 
         case _:
             return exit_program()
@@ -64,8 +66,8 @@ def create() -> Union[bool, None]:
     if check:
         print('Пользователь успешно создан!')
         return menu_authorize(user[0])
-    print('С этим логином и почтой уже существует учетная запись')
-    return False
+    print('С этим логином или почтой уже существует учетная запись')
+    return menu()
 
 
 def checking_values(prompts: list) -> list:
@@ -93,12 +95,16 @@ def authentication() -> Union[tuple, None]:
 
     # Извлекаем из базы сохраненную соль и хэш
     database = UserDatabase()
-    password_hash, salt = database.get_hash_and_salt(user[0])
 
-    # Хэшируем пароль с помощью сохраненной соли и сравниваем с хэшем из базы
-    saved_hash, _ = hash_password(user[1], salt)
-    if password_hash is not None and saved_hash is not None and password_hash == saved_hash:
-        return user
+    # Делаем проверку на существование пользователя в базе
+    check = database.get_hash_and_salt(user[0])
+    if check is not None:
+        password_hash, salt = database.get_hash_and_salt(user[0])
+        # Хэшируем пароль с помощью сохраненной соли и сравниваем с хэшем из базы
+        saved_hash, _ = hash_password(user[1], salt)
+        if password_hash == saved_hash:
+            return user
+
     print("Неправильный логин или пароль")
     return menu()
 

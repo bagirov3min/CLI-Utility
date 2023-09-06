@@ -83,18 +83,17 @@ class UserDatabase(Database):
 
     def delete_user(self, user: tuple) -> bool:
         """Удаляем пользователя"""
-        check = self.get_hash(user[0])
+        #check = self.get_hash(user[0])
 
         # Проверяем, если запрос check не имеет данных, то возвращаем False
         # Если данные по веденному логину или email есть в таблице, то проверяем сохраненный кэш с вновь полученным
         # Если хэши совпадают, делаем запрос на удаление строки в базу
-        if check == user[1]:
-            d_query = f"DELETE FROM {self.USERS_TABLE_NAME} WHERE (login = ? OR email = ?)"
-            self.cursor.execute(d_query, (user[0], user[0]))
-            count = self.cursor.rowcount
-            self.conn.commit()
-            return count > 0
-        return False
+        d_query = f"DELETE FROM {self.USERS_TABLE_NAME} WHERE (login = ? OR email = ?)"
+        self.cursor.execute(d_query, (user[0], user[0]))
+        count = self.cursor.rowcount
+        self.conn.commit()
+        return count > 0
+
 
     def get_hash(self, login: str) -> Union[bool, bytes]:
         if not self.row_exists():  # Если в таблице нет столбцов вернет False
