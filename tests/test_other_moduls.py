@@ -29,10 +29,10 @@ class TestModuls(unittest.TestCase):
             letter_list.extend(letter)
 
         password = ''.join([random.choice(letter_list) for _ in range(random.randint(8, 17))])
-        password_one, salt_one = operation.hash_password(password)
-        password_two, salt_two = operation.hash_password(password)
-        password_check_one, _ = operation.hash_password(password, salt_one)
-        password_check_two, _ = operation.hash_password(password, salt_two)
+        password_one, salt_one = menu.hash_password(password)
+        password_two, salt_two = menu.hash_password(password)
+        password_check_one, _ = menu.hash_password(password, salt_one)
+        password_check_two, _ = menu.hash_password(password, salt_two)
 
         assert password_one != password_two and password_check_one != password_check_two, \
             f'При сравнении паролей возникла ошибка'
