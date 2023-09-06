@@ -1,8 +1,8 @@
 import random
 
 
-def choice_settings():
-    '''Функция выбора настроек генерируемого пароля'''
+def choice_settings() -> list[str] | str:
+    """Функция выбора настроек генерируемого пароля"""
     # Создаем строки
     settings = {
         'digits': ("0123456789", "цифры"),
@@ -15,11 +15,11 @@ def choice_settings():
     chars = []
     # Добавляем строки в список в соответствии с выбранными параметрами
     for key, (value, description) in settings.items():
-        answer = input(f"Напишите да, если хотите использовать {description}: ")
+        answer = input(f"Наберите 1, если хотите использовать {description}: ")
 
-        if answer.lower() == 'да':
+        if answer.lower() == '1':
             chars.extend(value)
-        elif key == 'ambiguous' and answer.lower() != 'да':
+        elif key == 'ambiguous' and answer.lower() != '1':
             for char in value:
                 if char in chars:
                     chars.remove(char)
@@ -28,12 +28,11 @@ def choice_settings():
     if len(chars) == 0:
         print("Вы не выбрали ни один из предложенных вариантов символов")
         return choice_settings()
-
     return pass_choice(chars)
 
 
-def pass_choice(chars: list):
-    '''Генерируем пароль случайной длины из случайных символов списка и возвращаем его'''
+def pass_choice(chars: list) -> str:
+    """Генерируем пароль случайной длины из случайных символов списка и возвращаем его"""
     password = [random.choice(chars) for _ in range(random.randint(8, 17))]
     return ''.join(password)
 
