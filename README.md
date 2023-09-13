@@ -20,10 +20,12 @@ Data Storage: SQLite database.
 
 ## Usage
 
-The program can be employed to implement user authentication and 
-authorization services via the command-line interface (CLI). The 
-program uses password hashing with the sha256 algorithm to ensure
-the secure storage of passwords.
+The program can be used to implement services for secure
+storage of user-entered texts. This utility uses
+user authentication and authorization through the command line
+(CLI), and also employs password hashing with
+the sha256 algorithm to ensure the security
+of password storage.
 
 ## Installation
 
