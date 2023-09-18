@@ -24,6 +24,7 @@ def main_menu() -> Union[int, None]:
                 user_menu(user_id)
             else:
                 print('С этим логином или почтой уже существует учетная запись')
+                return main_menu()
 
         case "2":
             user_id = authentication()
