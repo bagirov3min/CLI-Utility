@@ -9,7 +9,7 @@ from utils import generate_password
 
 def create() -> Union[bool, None]:
     """Функция запроса к базе для создания пользователя"""
-    user_db = UserDatabase()
+    database = UserDatabase()
     # С помощью анонимных функций создаем список кортежей, в котором указаны условия
     # к вводимым пользователем строкам
     prompts = [
@@ -31,9 +31,10 @@ def create() -> Union[bool, None]:
     # Если создание прошло успешно, возвращаем соответствущее сообщение
     user[2], salt = hash_password(user[2])
     user = tuple(user)
-    check = user_db.create_user(user, salt)  ####!!!!
+    check = database.create_user(user, salt)
     if check:
-        return user[0]
+        user_id, _, _ = database.get_hash_salt_and_user_id(user[0])
+        return user_id
 
     return False
 

@@ -37,16 +37,15 @@ class TextDatabase(Database):
 
     def delete_text(self, text_id: int) -> str:
         """Удаляем текст"""
-        # Ищем столбец text в строке где есть введенный login
+        # Ищем столбец text в строке где есть введенный user_id
         query_check = f"SELECT text FROM {self.TEXT_TABLE_NAME} WHERE text_id = ?"
         self.cursor.execute(query_check, (text_id,))
         text_before_del = self.cursor.fetchone()  # Сохраняем текст, который был в столбце
 
-        # Ищем столбец text в строке где есть введенный login и обновляем его пустой строкой ""
+        # Ищем столбец text в строке где есть введенный user_id и удаляем его
         query = f"DELETE FROM {self.TEXT_TABLE_NAME} WHERE text_id = ?"
         self.cursor.execute(query, (text_id,))
         self.conn.commit()
-        print(text_before_del)
 
         # Проверяем, существовала ли вообще строка до этого запроса и возвращаем нужный ответ
         return text_before_del

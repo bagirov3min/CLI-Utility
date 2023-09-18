@@ -53,6 +53,9 @@ class UserDatabase(Database):
         # Если данные по веденному логину или email есть в таблице, то проверяем сохраненный кэш с вновь полученным
         # Если хэши совпадают, делаем запрос на удаление строки в базу
         d_query = f"DELETE FROM {self.USERS_TABLE_NAME} WHERE user_id = ?"
+        query = f"DELETE FROM {self.TEXT_TABLE_NAME} WHERE user_id = ?"
+        self.cursor.execute(query, (user_id,))
+        self.conn.commit()
         self.cursor.execute(d_query, (user_id,))
         count = self.cursor.rowcount
         self.conn.commit()

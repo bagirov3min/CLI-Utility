@@ -24,7 +24,7 @@ class Database:
             "text_id INTEGER PRIMARY KEY AUTOINCREMENT,"
             "user_id INTEGER,"
             "text TEXT,"
-            f"FOREIGN KEY (user_id) REFERENCES {self.USERS_TABLE_NAME}(user_id))"
+            f"FOREIGN KEY (user_id) REFERENCES {self.USERS_TABLE_NAME}(user_id) ON DELETE CASCADE)"
         )
         self.conn.commit()
 
