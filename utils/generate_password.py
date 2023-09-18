@@ -1,7 +1,7 @@
 import random
 
 
-def choice_settings() -> list[str] | str:
+def generate_password_settings() -> list[str] | str:
     """Функция выбора настроек генерируемого пароля"""
     # Создаем строки
     settings = {
@@ -27,11 +27,11 @@ def choice_settings() -> list[str] | str:
     # Проверяем содержит ли список строки после параметризации
     if len(chars) == 0:
         print("Вы не выбрали ни один из предложенных вариантов символов")
-        return choice_settings()
-    return pass_choice(chars)
+        return generate_password_settings()
+    return generate_password_from_string(chars)
 
 
-def pass_choice(chars: list) -> str:
+def generate_password_from_string(chars: list) -> str:
     """Генерируем пароль случайной длины из случайных символов списка и возвращаем его"""
     password = [random.choice(chars) for _ in range(random.randint(8, 17))]
     return ''.join(password)
