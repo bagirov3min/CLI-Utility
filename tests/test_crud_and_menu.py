@@ -175,7 +175,7 @@ class TestTextCreated(unittest.TestCase):
         result = mock_output.getvalue().strip().split()  # Сохраняем выведенную строку для сравнения результата теста
         result = ' '.join(result[-7:])
         assert result in expected_list, (f"При выводе текста возникла ошибка: {result} "
-                                                        f"(ожидалось: {expected_list})")
+                                         f"(ожидалось: {expected_list})")
 
 
 if __name__ == "__main__":

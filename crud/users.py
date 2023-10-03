@@ -1,19 +1,23 @@
+import sqlite3
 from typing import Union
 
 from database.session import Database
 
 
-class UserDatabase(Database):
+class User:
     """Создаем класс для работы с юзером"""
 
+    USERS_TABLE_NAME = "users_table"
+    TEXT_TABLE_NAME = "notes_table"
+    CREATE_TABLE = Database
+
     def __init__(self) -> None:
-        super().__init__(self.USERS_TABLE_NAME)
-        super().__init__(self.TEXT_TABLE_NAME)
+        self.conn = sqlite3.connect("records.sqlite")  # Создаем коннектор к базе
+        self.cursor = self.conn.cursor()  # Создаем курсор
+        self.CREATE_TABLE().create_tables()  # Создаем таблицу, если она не была еще создана
 
-    def create_user(self, user: tuple, salt: bytes) -> bool:
+    def create_user(self, user: tuple) -> bool:
         """Функция создания пользователя, принимает кортеж"""
-        self.create_tables()  # Создаем таблицу, если она не была еще создана
-
         # Делаем запрос к таблице, проверяем есть ли такой логин
         query_check_login = f"SELECT * FROM {self.USERS_TABLE_NAME} WHERE login = ?"
         self.cursor.execute(query_check_login, (user[0],))
@@ -29,9 +33,8 @@ class UserDatabase(Database):
         # Если пользователя еще не существует, то мы передаем на хеширование пароль, а после добавляем в базу
         # логин, email и хэшированный пароль
         else:
-            self.cursor.execute(f"INSERT INTO {self.USERS_TABLE_NAME} (login, email, password_hash, "
-                                f"password_salt) VALUES (?, ?, ?, ?)",
-                                (user[0], user[1], user[2], salt))
+            self.cursor.execute(f"INSERT INTO {self.USERS_TABLE_NAME} (login, email, password_hash) VALUES"
+                                f" (?, ?, ?)", (user[0], user[1], user[2]))
             self.conn.commit()
             return True
 
@@ -69,11 +72,19 @@ class UserDatabase(Database):
         self.cursor.execute(query, (login, login))
         return self.cursor.fetchone()
 
-    def get_hash_salt_and_user_id(self, login: str) -> Union[bool, bytes]:
-        """ Получаем соль, хэш и id user"""
+    def get_hash_and_user_id(self, login: str) -> Union[bool, bytes]:
+        """ Получаем хэш и id user"""
         if not self.row_exists():  # Если в таблице нет столбцов вернет False
             return False
-        query = (f"SELECT user_id, password_hash, password_salt FROM {self.USERS_TABLE_NAME}"
-                 f" WHERE (login = ? OR email = ?)")
+        query = f"SELECT user_id, password_hash FROM {self.USERS_TABLE_NAME} WHERE (login = ? OR email = ?)"
         self.cursor.execute(query, (login, login))
         return self.cursor.fetchone()
+
+    def row_exists(self) -> bool:
+        """Проверяем, есть ли строки в таблице и возвращаем нужный ответ"""
+        try:
+            self.cursor.execute(f"SELECT 1 FROM {self.TEXT_TABLE_NAME} LIMIT 1")
+            self.cursor.execute(f"SELECT 1 FROM {self.USERS_TABLE_NAME} LIMIT 1")
+            return True
+        except sqlite3.OperationalError:
+            return False

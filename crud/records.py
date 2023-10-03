@@ -4,11 +4,14 @@ from typing import Union
 from database.session import Database
 
 
-class TextDatabase(Database):
+class Text:
     """Создаем класс для работы с текстом"""
 
+    TEXT_TABLE_NAME = "notes_table"
+
     def __init__(self) -> None:
-        super().__init__(self.TEXT_TABLE_NAME)
+        self.conn = sqlite3.connect("records.sqlite")  # Создаем коннектор к базе
+        self.cursor = self.conn.cursor()  # Создаем курсор
 
     def add_text(self, user_id: int, text: str) -> bool:
         """Обновляем текст"""
@@ -54,7 +57,7 @@ class TextDatabase(Database):
         """Удаляем все записи"""
         # Ищем столбцы text в строках с user_id
         query_check = f"SELECT text FROM {self.TEXT_TABLE_NAME} WHERE user_id =?"
-        self.cursor.execute(query_check, (user_id, ))
+        self.cursor.execute(query_check, (user_id,))
         text_before_del = self.cursor.fetchall()
 
         # Ищем столбцы text в строках где есть user_id и удаляем их
@@ -65,28 +68,14 @@ class TextDatabase(Database):
         # Проверяем, существовала ли вообще строка до этого запроса и возвращаем нужный ответ
         return text_before_del
 
-    def read_text(self, user_id: int) -> str:
-        """Выводим текст на экран"""
-        # Ищем столбец text в строке где есть введенный login
-        query = f"SELECT text FROM {self.TEXT_TABLE_NAME} WHERE (user_id = ? and text_id = ?)"
-        with sqlite3.connect("records.sqlite") as conn:
-            cursor = conn.cursor()
-            cursor.execute(query, (user_id,))
-            text = cursor.fetchone()
-            if text:
-                return text[0]
-            return ""
-
-    def get_text(self, user_id: int) -> Union[list, None]:
+    def get_text_all(self, user_id: int) -> Union[list, None]:
         """ Получаем тексты по user_id """
         # Ищем столбец text в строке где есть введенный login
         query = f"SELECT text_id, text FROM {self.TEXT_TABLE_NAME} WHERE user_id = ?"
-        with sqlite3.connect("records.sqlite") as conn:
-            cursor = conn.cursor()
-            cursor.execute(query, (user_id,))
-            try:
-                result = cursor.fetchall()
-                return result
+        self.cursor.execute(query, (user_id,))
+        try:
+            result = self.cursor.fetchall()
+            return result
 
-            except sqlite3.OperationalError:
-                return None
+        except sqlite3.OperationalError:
+            return None
