@@ -1,15 +1,14 @@
 import hashlib
-import os
 import re
-from typing import Union, Tuple
+from typing import Union
 
-from crud.users import UserDatabase
+from crud.users import User
 from utils import generate_password
+from decouple import config
 
 
 def create() -> Union[bool, None]:
     """Функция запроса к базе для создания пользователя"""
-    database = UserDatabase()
     # С помощью анонимных функций создаем список кортежей, в котором указаны условия
     # к вводимым пользователем строкам
     prompts = [
@@ -29,11 +28,11 @@ def create() -> Union[bool, None]:
               f'Запишите его в надежное место или запомните')
     # Преобразуем список в кортеж и отправляем его в базу данных на проверку.
     # Если создание прошло успешно, возвращаем соответствущее сообщение
-    user[2], salt = hash_password(user[2])
+    user[2] = hash_password(user[2])
     user = tuple(user)
-    check = database.create_user(user, salt)
+    check = User().create_user(user)
     if check:
-        user_id, _, _ = database.get_hash_salt_and_user_id(user[0])
+        user_id, _ = User().get_hash_and_user_id(user[0])
         return user_id
 
     return False
@@ -62,15 +61,15 @@ def authentication() -> Union[int, None]:
     # Создаем кортеж
     user = tuple(check_values(prompts))
 
-    # Извлекаем из базы сохраненную соль и хэш
-    database = UserDatabase()
+    # Извлекаем из базы хэш
+    database = User()
 
     # Делаем проверку на существование пользователя в базе
-    check = database.get_hash_salt_and_user_id(user[0])
+    check = database.get_hash_and_user_id(user[0])
     if check is not None:
-        user_id, password_hash, salt = database.get_hash_salt_and_user_id(user[0])
+        user_id, password_hash = database.get_hash_and_user_id(user[0])
         # Хэшируем пароль с помощью сохраненной соли и сравниваем с хэшем из базы
-        saved_hash, _ = hash_password(user[1], salt)
+        saved_hash = hash_password(user[1])
         if password_hash == saved_hash:
             return user_id
 
@@ -78,13 +77,13 @@ def authentication() -> Union[int, None]:
     return False
 
 
-def hash_password(password: str, salt: bytes = None) -> Tuple[bytes, bytes]:
+def hash_password(password: str) -> bytes:
     """Хэшируем пароль"""
-    if salt is None:
-        salt = os.urandom(16)  # Генерируем случайную соль
-    key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+    salt = config('SECRET_SALT')
+    salt_bytes = bytes.fromhex(salt)
+    key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt_bytes, 100000)
     # Хэшируем пароль с использованием соли
-    return key, salt
+    return key
 
 
 def check_int() -> int:

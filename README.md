@@ -1,43 +1,53 @@
-# CLI Utility
+# CLI-утилита.
 
-Welcome to My CLI Utility Project!
+Добро пожаловать в мой проект CLI-утилита!
 
-[English](README.md) | [Русский](README-ru.md)
+[English](README-en.md) | [Русский](README.md)
 
-## Description
+## Описание
 
-This application provides user authentication (registration 
-and authorization) capabilities through the command-line 
-interface (CLI). Users can set their name, email, and password, 
-and also have the option to generate a password automatically. 
-Upon successful authorization, users gain access to commands for 
-adding records to the storage (any text entered through the 
-keyboard). When exiting the program (either through a command 
-or by closing the window), registration data is saved. However, 
-for the next login, users need to authenticate again.
+Приложение предоставляет возможность аутентификации пользователя
+(регистрация и авторизация) с использованием командной строки
+(CLI). Пользователи могут задать имя, email и пароль, а также
+имеют возможность генерировать пароль автоматически. После
+успешной авторизации пользователь получает доступ к командам
+для добавления записей в хранилище (любой текст, введенный с
+клавиатуры). При выходе из программы (по команде или закрытии окна)
+регистрационные данные сохраняются, но для следующего
+входа в программу требуется повторная авторизация.
 
-Data Storage: SQLite database.
+Хранилище данных: SQLite база данных.
 
-## Usage
+## Применение
+Программа может использоваться для реализации сервисов по защищенному
+хранению текстов, введенных пользователем. Данная утилита использует 
+аутентификацию и авторизацию пользователей через командную
+строку (CLI), а также использует хеширование паролей с
+применением алгоритма sha256 для обеспечения безопасности
+хранения паролей.
 
-The program can be used to implement services for secure
-storage of user-entered texts. This utility uses
-user authentication and authorization through the command line
-(CLI), and also employs password hashing with
-the sha256 algorithm to ensure the security
-of password storage.
+## Установка
 
-## Installation
 
-1. Clone the repository: `git clone 
+1. Клонируйте репозиторий: `git clone 
    https://github.com/bagirov3min/CLI-Utility`
-2. Navigate to the root directory of your project
-3. Run the program by executing the main.py file
+2. Перейдите в корневую директорию вашего проекта
+3. Установите зависимости из requirements.txt:
+    ```bash
+    pip install -r requirements.txt
+4. Запустите файл generate_salt.py:
+    ```bash
+    python utils/generate_salt.py
+5. Затем запустите программу, выполнив файл main.py
+    ```bash
+    python main.py
+6. Чтобы запустить тесты, используйте файл test_suite.py
+    ```bash
+    python test_suite.py
+## Авторы
 
-## Authors
-
-Name: Emin <br>
-Last: Bagirov <br>
+Имя: Emin <br>
+Фамилия: Bagirov <br>
 GitHub: [@bagirov3min](https://github.com/bagirov3min) <br>
 Email: bagirov3min@gmail.com <br>
 Telegram: @Emin_pro <br>

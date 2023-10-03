@@ -1,11 +1,11 @@
-from crud.records import TextDatabase
+from crud.records import Text
 
 
-class TextOperation:
+class TextModel:
     """Операционный модуль для работы с текстом"""
 
     def __init__(self):
-        self.text_db = TextDatabase()
+        self.text_db = Text()
 
     def add(self, user_id: int, text: str) -> None:
         """Функция добавления текста в таблицу"""
@@ -37,9 +37,9 @@ class TextOperation:
         else:
             print('Еще не создано ни одной записи!')
 
-    def read(self, user_id: int) -> None:
+    def get_text(self, user_id: int) -> None:
         """Функция вывода на просмотр сохраненного текста"""
-        check = self.text_db.read_text(user_id)
+        check = self.text_db.get_text_all(user_id)
         if check:
             print(check)
         else:

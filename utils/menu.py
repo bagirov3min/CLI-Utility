@@ -1,14 +1,14 @@
 from typing import Union
 
-from crud.records import TextDatabase
-from crud.users import UserDatabase
-from models.records import TextOperation
+from crud.records import Text
+from crud.users import User
+from models.records import TextModel
 from models.users import create, authentication, check_int
 
 
 def main_menu() -> Union[int, None]:
     """Функция запуска программы и распределение запросов"""
-    user_db = UserDatabase()
+    user_db = User()
 
     query = input(
         ' Чтобы создать пользователя наберите "1".\n'
@@ -47,11 +47,11 @@ def main_menu() -> Union[int, None]:
 
 def user_menu(user_id: int) -> Union[str, None, bool]:
     """ Функция распределение авторизированных запросов """
-    text_operation = TextOperation()
-    text_db = TextDatabase()
+    text_model = TextModel()
+    text_db = Text()
     while True:
 
-        all_record = text_db.get_text(user_id)
+        all_record = text_db.get_text_all(user_id)
         if len(all_record) > 0:
             print("Ваши записи:")
             for record in all_record:
@@ -71,19 +71,19 @@ def user_menu(user_id: int) -> Union[str, None, bool]:
         match query:
             case "1":
                 text = input("Введите новый текст: \n")
-                text_operation.add(user_id, text)
+                text_model.add(user_id, text)
 
             case "2":
                 text_id = check_int()
                 text = input("Введите текст, который хотите добавить: \n")
-                text_operation.update(text_id, text)
+                text_model.update(text_id, text)
 
             case "3":
                 text_id = check_int()
-                text_operation.delete(text_id)
+                text_model.delete(text_id)
 
             case "4":
-                text_operation.delete_all(user_id)
+                text_model.delete_all(user_id)
 
             case "5":
                 return logout(user_id)

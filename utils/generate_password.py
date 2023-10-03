@@ -35,4 +35,3 @@ def generate_password_from_string(chars: list) -> str:
     """Генерируем пароль случайной длины из случайных символов списка и возвращаем его"""
     password = [random.choice(chars) for _ in range(random.randint(8, 17))]
     return ''.join(password)
-
